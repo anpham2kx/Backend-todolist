@@ -1,0 +1,13 @@
+const mongoose = require("mongoose");
+
+const TaskSchema = new mongoose.Schema({
+  text: {
+    type: String,
+    required: [true, "Vui lòng nhập nội dung công việc"],
+    trim: true,
+  },
+  completedAt: { type: Date, default: null },
+  createdAt: { type: Date, default: Date.now },
+});
+
+module.exports = mongoose.model("Task", TaskSchema);

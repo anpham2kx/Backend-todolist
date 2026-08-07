@@ -25,6 +25,25 @@ const addNewTask = async (req, res) => {
   }
 };
 
+const updateTask = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    if (req.body.completed === true) {
+      req.body.completedAt = new Date();
+    } else if (req.body.completed === false) {
+      req.body.completedAt = null;
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    res.status(200).json({ success: true, data: updatedTask });
+  } catch (error) {
+    res.status(500).json({ errorMsg: "Lỗi server nội bộ" });
+  }
+};
+
 const deleteTask = async (req, res) => {
   try {
     await Task.findByIdAndDelete(req.params.id);
@@ -35,4 +54,4 @@ const deleteTask = async (req, res) => {
   }
 };
 
-module.exports = {getAllTask, addNewTask, deleteTask}
+module.exports = { getAllTask, addNewTask, updateTask, deleteTask };

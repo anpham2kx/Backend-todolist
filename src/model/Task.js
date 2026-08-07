@@ -6,6 +6,10 @@ const TaskSchema = new mongoose.Schema({
     required: [true, "Vui lòng nhập nội dung công việc"],
     trim: true,
   },
+  completed: {
+    type: Boolean,
+    default: false,
+  },
   completedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
 });

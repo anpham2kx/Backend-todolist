@@ -2,11 +2,52 @@ const Task = require("../model/Task");
 
 const getAllTask = async (req, res) => {
   try {
-    const tasks = await Task.find();
-    res.status(200).json(tasks);
+    const { status, page = 1, limit = 4 } = req.query;
+
+    let queryCondition = {};
+
+    if (status === "in-progress") {
+      queryCondition.completed = false;
+    } else if (status === "completed") {
+      queryCondition.completed = true;
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const tasks = await Task.find(queryCondition)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    const totalItems = await Task.countDocuments(queryCondition);
+    const totalPages = Math.ceil(totalItems / Number(limit));
+
+    res.status(200).json({
+      tasks: tasks,
+      totalPages: totalPages,
+    });
   } catch (error) {
     res.status(500).send("Error");
     console.error(error);
+  }
+};
+
+const getTaskStatistics = async (req, res) => {
+  try {
+    const [total, inProgress, completed] = await Promise.all([
+      Task.countDocuments(),
+      Task.countDocuments({ completed: false }),
+      Task.countDocuments({ completed: true }),
+    ]);
+
+    res.status(200).json({
+      totalTasks: total,
+      inProgressTasks: inProgress,
+      completedTasks: completed,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Lỗi server khi thống kê nhiệm vụ" });
   }
 };
 
@@ -54,4 +95,10 @@ const deleteTask = async (req, res) => {
   }
 };
 
-module.exports = { getAllTask, addNewTask, updateTask, deleteTask };
+module.exports = {
+  getAllTask,
+  addNewTask,
+  updateTask,
+  deleteTask,
+  getTaskStatistics,
+};
